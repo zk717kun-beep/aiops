@@ -1,0 +1,106 @@
+# AIOps-Bridge 全局配置文件
+
+# 1. 飞书 API 配置 (Feishu API Settings)
+# 请在飞书开放平台 (https://open.feishu.cn/) 获取以下信息
+feishu:
+  app_id: "cli_xxxxxxxxxxxx"
+  app_secret: "xxxxxxxxxxxxxxxxxxxxxxxx"
+  verification_token: "xxxxxxxxxxxx" # 用于 Webhook 事件签名校验
+  encrypt_key: "xxxxxxxxxxxx"      # 如果开启了事件加密，请填写
+  bot_name: "AIOps-Admin"
+
+# 2. 安全与准入控制 (Security & Access Control)
+security:
+  # 管理员白名单：只有在此列表中的 open_id 才能触发指令
+  # 建议通过飞书机器人后台获取管理员的 open_id
+  admin_whitelist:
+    - "ou_1234567890abcdef"
+    - "ou_fedcba0987654321"
+  
+  # 命令审计开关
+  enable_sandbox: true
+  
+  # 指令超时时间 (秒)
+  command_timeout: 60
+
+  # 危险指令黑名单 (正则表达式)
+  # 匹配到以下模式的指令将被拒绝执行
+  black_list_patterns:
+    - "rm\\s+.*-r"         # 递归删除
+    - "mkfs"               # 格式化
+    - "reboot|shutdown"    # 关机重启
+    - ">\\s*/dev/"         # 写设备
+    - "chmod\\s+777"       # 危险权限控制
+    - "passwd"             # 修改密码
+    - "curl.*\\|.*bash"    # 远程脚本注入
+
+# 3. 提权与执行环境 (Privilege & Execution)
+execution:
+  # 预设的环境变量
+  env_vars:
+    PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    LANG: "en_US.UTF-8"
+  
+  # sudo 提权白名单 (必须在 /etc/sudoers 中配置了 NOPASSWD)
+  # 只有以下开头的命令允许使用 sudo 执行
+  sudo_allow_list:
+    - "sudo systemctl restart"
+    - "sudo docker"
+    - "sudo tail -n"
+    - "sudo du -sh"
+
+# 4. 消息交互配置 (Interaction Settings)
+interaction:
+  # 结果反馈策略
+  max_stdout_length: 2000     # 超过此长度的消息将触发截断或转为文件
+  enable_file_callback: true   # 输出过长时是否尝试通过飞书文件接口发送
+  temp_file_path: "/tmp/aiops_bridge/" # 临时日志存放路径
+
+# 5. 系统运行日志 (Logging)
+logging:
+  level: "INFO" # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/aiops_bridge.log"
+  retention_days: 7
+
+# 大模型底层引擎配置 (LLM Engine Settings)
+llm_engine:
+  # 全局控制参数
+  global:
+    request_timeout: 120    # 全局网络请求超时时间(秒)
+    max_retries: 3          # 失败重试次数
+
+  # 默认路由：定义不同场景下默认使用的模型别名
+  routing:
+    default_chat: "minimax-chat"      # 闲聊/通用交互使用性价比高的模型
+    default_ops_agent: "gpt-4-core"   # 核心运维决策使用高逻辑模型
+    default_local: "local-qwen"       # 涉密数据处理强制走本地模型
+
+  # 模型节点池 (Node Pool)
+  # 键名为内部引用的 Alias (别名)
+  nodes:
+    # 1. MiniMax 配置 (支持流式)
+    minimax-chat:
+      provider: "minimax"                       # 决定实例化哪个 Adapter
+      model_name: "abab6.5s-chat"               # 真实请求的模型名称
+      api_base: "https://api.minimax.chat/v1"
+      api_key: "${ENV:MINIMAX_API_KEY}"         # 敏感信息通过环境变量注入
+      temperature: 0.7
+      stream: true
+      
+    # 2. OpenAI / DeepSeek 配置
+    gpt-4-core:
+      provider: "openai"
+      model_name: "gpt-4o"
+      api_base: "https://api.openai.com/v1"
+      api_key: "${ENV:OPENAI_API_KEY}"
+      temperature: 0.2                          # 运维指令生成需要较低的温度以保证确定性
+      stream: false
+
+    # 3. 局域网私有化模型 (vLLM 等)
+    local-qwen:
+      provider: "openai"                        # vLLM 兼容 OpenAI 协议
+      model_name: "qwen3-72b-instruct"
+      api_base: "http://10.0.0.8:8000/v1"       # 内网地址
+      api_key: "EMPTY"                          # 内网通常免密
+      temperature: 0.1
+      stream: true

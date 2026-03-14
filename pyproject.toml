@@ -1,0 +1,29 @@
+[project]
+name = "aiops"
+version = "0.1.0"
+description = "AI-powered Ops Bridge for Feishu and Linux Server"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.13.3",
+    "fastapi>=0.135.1",
+    "pydantic-settings>=2.13.1",
+    "pyyaml>=6.0.3",
+    "uvicorn>=0.41.0",
+]
+
+[dependency-groups]
+dev = [
+    "black>=26.3.1",
+    "isort>=8.0.1",
+    "pytest>=9.0.2",
+    "ruff>=0.15.5",
+]
+
+# 这是最关键的配置：定义一个名为 start 的可执行指令，指向 main 模块的 start 函数
+[project.scripts]
+start = "main:start"
+
+[tool.uv]
+managed = true
+package = true
