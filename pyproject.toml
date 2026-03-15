@@ -23,6 +23,7 @@ dev = [
 # 这是最关键的配置：定义一个名为 start 的可执行指令，指向 main 模块的 start 函数
 [project.scripts]
 start = "main:start"
+llm-chat-test = "tools.test_llm_chat:main"
 
 [tool.uv]
 managed = true
