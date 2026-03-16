@@ -83,7 +83,7 @@ llm_engine:
       provider: "minimax"                       # 决定实例化哪个 Adapter
       model_name: "abab6.5s-chat"               # 真实请求的模型名称
       api_base: "https://api.minimax.chat/v1"
-      api_key: "${ENV:MINIMAX_API_KEY}"         # 敏感信息通过环境变量注入
+      api_key: "sk-api-k9uUjdBlGXZryAc49USSZVKNP4-2ue9oPrl8YLvPdjX1W8RI6j63h8sfx4_ENQ_1iL4dGmN48wJwCn_hfWvISbfrfUdTajO2v4Kvk7DL9TekY1vGpIU5DCw"         # 敏感信息通过环境变量注入
       temperature: 0.7
       stream: true
       

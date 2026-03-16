@@ -22,4 +22,4 @@ def load_yaml_with_env(file_path: str) -> dict:
     return yaml.safe_load(parsed_content)
 
 # 初始化全局配置
-# CONFIG = load_yaml_with_env("config.yaml")
+CONFIG = load_yaml_with_env("config.yaml")

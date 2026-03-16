@@ -4,6 +4,7 @@ import json
 import os
 import sys
 from typing import Any
+from config_loader import CONFIG
 
 import aiohttp
 
@@ -47,7 +48,8 @@ async def send_minimax_chat(
 
 
 async def run_test(args: argparse.Namespace) -> int:
-    api_key = args.api_key or os.getenv(args.api_key_env)
+    # 推荐写法（处理包含横杠的键名）
+    api_key = args.api_key or CONFIG['llm_engine']['nodes']['minimax-chat']['api_key']
     if not api_key:
         print(f"缺少 API Key，请通过 --api-key 或环境变量 {args.api_key_env} 提供", file=sys.stderr)
         return 2

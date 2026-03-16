@@ -26,6 +26,11 @@ start = "main:start"
 llm-chat-test = "tools.test_llm_chat:main"
 minimax-chat-test = "tools.test_minimax_chat:main"
 
+[tool.setuptools]
+# 除了文件夹，还要包含根目录下的 py_modules（如 main.py 和 config_loader.py）
+packages = ["core", "llm", "utils", "tools"]
+py-modules = ["main", "config_loader"]
+
 [tool.uv]
 managed = true
 package = true
