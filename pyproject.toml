@@ -24,6 +24,7 @@ dev = [
 [project.scripts]
 start = "main:start"
 llm-chat-test = "tools.test_llm_chat:main"
+minimax-chat-test = "tools.test_minimax_chat:main"
 
 [tool.uv]
 managed = true
