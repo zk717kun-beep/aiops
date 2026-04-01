@@ -35,7 +35,10 @@ class LLMClient:
         messages.append({"role": "user", "content": prompt})
 
         resp = await self.client.chat.completions.create(
-            model=self.model, messages=messages, temperature=temperature
+            model=self.model, 
+            messages=messages, 
+            temperature=temperature, 
+            extra_body={"reasoning_split": True},
         )
         return resp.choices[0].message.content.strip()
 
